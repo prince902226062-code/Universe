@@ -1,0 +1,44 @@
+/* ============================================================
+   Her Universe — Astronaut Mouse Pointer Styles
+   ============================================================ */
+
+.astronaut-cursor-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.astronaut-cursor-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* Hide system cursor only when astronaut companion is active on precision pointer devices */
+@media (pointer: fine) {
+  body.astronaut-pointer-active {
+    cursor: default;
+  }
+
+  body.astronaut-pointer-active button,
+  body.astronaut-pointer-active a,
+  body.astronaut-pointer-active [role="button"],
+  body.astronaut-pointer-active input,
+  body.astronaut-pointer-active select {
+    cursor: pointer;
+  }
+}
+
+/* Touch device adjustments */
+@media (pointer: coarse) {
+  .astronaut-cursor-overlay.hide-on-touch {
+    display: none !important;
+  }
+}

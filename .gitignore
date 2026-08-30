@@ -1,0 +1,18 @@
+# Dependencies & Build outputs
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+dist-ssr/
+**/dist-ssr/
+
+# Large Video Files (>100MB exceeds GitHub hard limit)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# OS & Environment
+.DS_Store
+*.log
+*.local
