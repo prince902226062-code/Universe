@@ -11,6 +11,7 @@ import { useRef, useState, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
+import { mediaDB } from '../../utils/mediaDB';
 import type { MemoryEntry } from '../../data/memories';
 import { PHOTO_SAMPLER_CONFIG } from '../../data/config';
 import { lerp } from '../../utils/orbitMath';
@@ -26,65 +27,31 @@ interface PhotoAnchorProps {
   timeRef?: React.RefObject<number>;
 }
 
-// Global texture cache with 256x256 downsampled bitmaps for zero FPS lag
-export const textureCache = new Map<string, THREE.Texture>();
+// ── Backward-compatible shim (used by SpecialPhotoPlanet for preloading) ──
+// Internally delegates to the centralised mediaDB which uses IDB + LRU.
+export const textureCache = new Map<string, THREE.Texture>(); // kept for type-compat only
 
 export function loadDownsampledTexture(url: string, callback?: (tex: THREE.Texture) => void): THREE.Texture {
-  if (textureCache.has(url)) {
-    const cached = textureCache.get(url)!;
-    callback?.(cached);
-    return cached;
-  }
-
-  const placeholder = new THREE.Texture();
-  placeholder.needsUpdate = false;
-  textureCache.set(url, placeholder);
-
-  // Decode off main thread using background createImageBitmap
-  fetch(url)
-    .then((res) => res.blob())
-    .then((blob) => createImageBitmap(blob, { resizeWidth: 128, resizeHeight: 128, resizeQuality: 'low' }))
-    .then((bitmap) => {
-      const tex = new THREE.CanvasTexture(bitmap as unknown as HTMLCanvasElement);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.generateMipmaps = false;
-      tex.minFilter = THREE.LinearFilter;
-      textureCache.set(url, tex);
-      callback?.(tex);
-    })
-    .catch(() => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
-      const grad = ctx.createLinearGradient(0, 0, 128, 128);
-      grad.addColorStop(0, '#4a1942');
-      grad.addColorStop(0.5, '#8b2f6b');
-      grad.addColorStop(1, '#c4507a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 128, 128);
-      ctx.font = '40px serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(255,200,220,0.8)';
-      ctx.fillText('❤', 64, 80);
-
-      const fallback = new THREE.CanvasTexture(canvas);
-      textureCache.set(url, fallback);
-      callback?.(fallback);
-    });
-
-  return placeholder;
-}
-
-function useSafeTexture(url: string): THREE.Texture {
-  const [texture, setTexture] = useState<THREE.Texture>(() => {
-    return loadDownsampledTexture(url);
+  // Fire async load through mediaDB (deduped, LRU, IDB-cached)
+  mediaDB.loadTexture(url).then((tex) => {
+    textureCache.set(url, tex); // keep shim map in sync for any legacy readers
+    callback?.(tex);
   });
 
+  // Return whatever we have synchronously (placeholder or cached)
+  return mediaDB.getTexture(url);
+}
+
+// ── Hook: resolves a texture url through mediaDB ──────────────
+function useSafeTexture(url: string): THREE.Texture {
+  const [texture, setTexture] = useState<THREE.Texture>(() => mediaDB.getTexture(url));
+
   useEffect(() => {
-    loadDownsampledTexture(url, (tex) => {
-      setTexture(tex);
+    let cancelled = false;
+    mediaDB.loadTexture(url).then((tex) => {
+      if (!cancelled) setTexture(tex);
     });
+    return () => { cancelled = true; };
   }, [url]);
 
   return texture;
@@ -96,7 +63,7 @@ const sharedPhotoGeo = new THREE.PlaneGeometry(0.66, 0.51);
 export function PhotoAnchor({
   memory,
   planetRadius,
-  planetRotationYRef,
+  planetRotationYRef: _planetRotationYRef, // kept in API for callers; theta is time-based
   isSelected,
   isAnySelected,
   onSelect,
@@ -137,7 +104,8 @@ export function PhotoAnchor({
     if (!groupRef.current) return;
     const safeDelta = Math.min(delta, 0.033);
 
-    const rotY = planetRotationYRef.current ?? 0;
+    // Note: planetRotationYRef is kept for API compat; theta revolving is time-based
+
     const time = timeRef?.current ?? 0;
 
     // Differential revolving orbital speed (silky smooth, fluid orbital movement)

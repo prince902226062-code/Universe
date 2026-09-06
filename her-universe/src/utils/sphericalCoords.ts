@@ -69,7 +69,7 @@ export function angularDistance(
 export function findNearestMemory(
   intersectionPoint: THREE.Vector3,
   memories: MemoryEntry[],
-  planetRotationY = 0,
+  _planetRotationY = 0,
   time = 0
 ): { memory: MemoryEntry; distance: number } | null {
   if (memories.length === 0) return null;

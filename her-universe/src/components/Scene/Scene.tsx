@@ -185,7 +185,7 @@ function SceneInner({
 
       {/* Bloom and Post-Processing optimized for 90-120 FPS+ */}
       {tier.bloomEnabled && (
-        <EffectComposer multisampling={0} disableNormalPass>
+        <EffectComposer multisampling={0} enableNormalPass={false}>
           <Bloom
             intensity={SCENE_CONFIG.bloomStrength}
             luminanceThreshold={SCENE_CONFIG.bloomThreshold}

@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { TreasureConfig } from '../../data/treasures';
+import { mediaDB } from '../../utils/mediaDB';
 
 interface VideoHologramModalProps {
   treasure: TreasureConfig | null;
@@ -21,6 +22,8 @@ export function VideoHologramModal({ treasure, onClose }: VideoHologramModalProp
   const [isMuted, setIsMuted] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isCaching, setIsCaching] = useState(false);   // true while fetching+caching via IDB
+  const [videoSrc, setVideoSrc] = useState<string | null>(null); // resolved blob URL or original
   const bufferingTimerRef = useRef<number | null>(null);
 
   const handleWaiting = () => {
@@ -59,20 +62,52 @@ export function VideoHologramModal({ treasure, onClose }: VideoHologramModalProp
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  // Video playback initialization
+  // Resolve video URL through IDB cache (blob URL) when treasure changes
   useEffect(() => {
-    if (!treasure) return;
+    if (!treasure) {
+      setVideoSrc(null);
+      return;
+    }
+
+    // Check if blob URL is already cached synchronously
+    const cached = mediaDB.getBlobUrl(treasure.videoUrl);
+    if (cached) {
+      setVideoSrc(cached);
+      setIsCaching(false);
+      return;
+    }
+
+    // Not cached yet — fetch & store in IDB, show caching indicator
+    setVideoSrc(null);
+    setIsCaching(true);
+    setVideoError(false);
+
+    mediaDB.loadBlobUrl(treasure.videoUrl)
+      .then((blobUrl) => {
+        setVideoSrc(blobUrl);
+        setIsCaching(false);
+      })
+      .catch(() => {
+        // IDB or fetch failed — fall back to direct URL
+        setVideoSrc(treasure.videoUrl);
+        setIsCaching(false);
+      });
+  }, [treasure]);
+
+  // Video playback initialization — runs after videoSrc is set
+  useEffect(() => {
+    if (!treasure || !videoSrc) return;
     setVideoError(false);
     setIsPlaying(true);
 
     if (videoRef.current) {
+      videoRef.current.load();
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {
-        // Fall back gracefully if autoplay is restricted by browser policy
         setIsPlaying(false);
       });
     }
-  }, [treasure]);
+  }, [treasure, videoSrc]);
 
   // Canvas animated fallback preview generator (when mp4 file is not yet placed)
   useEffect(() => {
@@ -274,28 +309,64 @@ export function VideoHologramModal({ treasure, onClose }: VideoHologramModalProp
             border: '1px solid rgba(255, 255, 255, 0.15)',
           }}
         >
+          {/* Video caching first-load overlay */}
+          {isCaching && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(0, 0, 0, 0.75)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 20,
+              }}
+            >
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid rgba(255, 255, 255, 0.2)',
+                  borderTop: `3px solid ${treasure.color}`,
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }}
+              />
+              <span style={{ marginTop: '10px', fontSize: '12px', color: '#ffffff', letterSpacing: '0.05em' }}>
+                Caching Video Memory... 💾
+              </span>
+              <span style={{ marginTop: '4px', fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>
+                Next time it will load instantly!
+              </span>
+            </div>
+          )}
+
           {!videoError ? (
             <>
-              <video
-                ref={videoRef}
-                src={treasure.videoUrl}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  transform: `rotate(${rotation}deg)`,
-                  transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                playsInline
-                preload="auto"
-                controls
-                onWaiting={handleWaiting}
-                onPlaying={handlePlaying}
-                onPause={() => setIsPlaying(false)}
-                onCanPlay={handleCanPlay}
-                onEnded={() => setIsPlaying(false)}
-                onError={() => setVideoError(true)}
-              />
+              {videoSrc && (
+                <video
+                  ref={videoRef}
+                  src={videoSrc}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    transform: `rotate(${rotation}deg)`,
+                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}
+                  playsInline
+                  preload="auto"
+                  controls
+                  onWaiting={handleWaiting}
+                  onPlaying={handlePlaying}
+                  onPause={() => setIsPlaying(false)}
+                  onCanPlay={handleCanPlay}
+                  onEnded={() => setIsPlaying(false)}
+                  onError={() => setVideoError(true)}
+                />
+              )}
 
               {/* Video Buffering / Loading Spinner */}
               {isBuffering && (

@@ -58,7 +58,7 @@ export function CinematicCamera({
   isPuzzleFocused,
   focusedTreasurePos,
 }: CinematicCameraProps) {
-  const { camera, gl } = useThree();
+  const { camera, gl: _gl } = useThree();
   const { smoothed } = useSmoothPointer({ damping: 0.08, strength: 1 });
 
   // Base camera state

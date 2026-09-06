@@ -75,7 +75,7 @@ function randomFrom<T>(arr: T[]): T {
 // ── Main hook ────────────────────────────────────────────────
 export function usePlanetQuizGame(
   introComplete: boolean,
-  isFocused: boolean,      // is user zoomed into a planet?
+  _isFocused: boolean,      // is user zoomed into a planet?
   onAstronautSpeak: (msg: string | null) => void,
   onGuideAction: (action: 'idle' | 'happy-bounce' | 'celebrate' | 'turn-to-star') => void,
 ): QuizGameState & QuizGameActions {

@@ -20,7 +20,8 @@ import { getOrbitPosition } from '../../utils/orbitMath';
 import { findNearestMemory } from '../../utils/sphericalCoords';
 import { OrbitPath } from '../Scene/OrbitPath';
 import { Moon } from '../Scene/Moon';
-import { PhotoAnchor, loadDownsampledTexture } from './PhotoAnchor';
+import { PhotoAnchor } from './PhotoAnchor';
+import { mediaDB } from '../../utils/mediaDB';
 
 export type PlanetState = 'overview' | 'hover' | 'focused' | 'memoryOpen';
 
@@ -84,19 +85,17 @@ export function SpecialPhotoPlanet({
     return () => clearInterval(interval);
   }, [memories.length]);
 
-  // Pre-load next batch with staggered background fetching (150ms apart) so main thread stays 100% idle!
+  // Stagger preload of the NEXT batch using requestIdleCallback (via mediaDB)
+  // so the render loop is never blocked by background image loading.
   useEffect(() => {
     if (memories.length <= BATCH_SIZE) return;
     const nextOffset = (photoOffset + BATCH_SIZE) % memories.length;
-    const timers: number[] = [];
+    const nextUrls: string[] = [];
     for (let i = 0; i < BATCH_SIZE; i++) {
-      const timer = window.setTimeout(() => {
-        const idx = (nextOffset + i) % memories.length;
-        loadDownsampledTexture(memories[idx].imageUrl);
-      }, i * 150);
-      timers.push(timer);
+      const idx = (nextOffset + i) % memories.length;
+      nextUrls.push(memories[idx].imageUrl);
     }
-    return () => timers.forEach(window.clearTimeout);
+    mediaDB.preloadTextures(nextUrls);
   }, [photoOffset, memories]);
 
   const visibleMemories = useMemo(() => {
