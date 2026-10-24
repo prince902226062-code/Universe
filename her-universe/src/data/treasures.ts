@@ -28,7 +28,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A glowing cosmic capsule floating near Venus, preserving an unforgettable smile.',
     position: [25, 8, -18],
     rotation: [0.2, 0.4, 0.1],
-    videoUrl: '/videos/8376ba453ffe84e2f3051273eee97d81.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/8376ba453ffe84e2f3051273eee97d81.mp4`,
     color: '#ff77c8',
   },
   {
@@ -39,7 +39,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'An ancient lost probe broadcasting sweet laughter across the asteroid belt.',
     position: [-38, 14, 28],
     rotation: [0.1, -0.6, 0.3],
-    videoUrl: '/videos/ed67ec32fe6d7cbc482f8b656a9c9531.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/ed67ec32fe6d7cbc482f8b656a9c9531.mp4`,
     color: '#70d6ff',
   },
   {
@@ -50,7 +50,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A pulsing stellar crystal shining with magical birthday wishes near Jupiter.',
     position: [62, -6, -38],
     rotation: [0.5, 0.2, -0.4],
-    videoUrl: '/videos/VID20260129141028.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID20260129141028.mp4`,
     color: '#ffd166',
   },
   {
@@ -61,7 +61,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A mini glowing relic radiating warmth near Saturn.',
     position: [-72, 20, -28],
     rotation: [-0.3, 0.5, 0.2],
-    videoUrl: '/videos/VID-20260209-WA0020.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID-20260209-WA0020.mp4`,
     color: '#ff55aa',
   },
   {
@@ -72,7 +72,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A shimmering capsule floating near Uranus, holding joyful memories.',
     position: [45, -15, 52],
     rotation: [0.3, -0.2, 0.5],
-    videoUrl: '/videos/VID-20260223-WA0065.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID-20260223-WA0065.mp4`,
     color: '#06d6a0',
   },
   {
@@ -83,7 +83,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A probe beaming radiant melodies from the edge of Neptune.',
     position: [-55, -8, -60],
     rotation: [-0.4, 0.3, -0.2],
-    videoUrl: '/videos/6c7bb20f0f2e7bbd0b2aef6094c34ed0.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/6c7bb20f0f2e7bbd0b2aef6094c34ed0.mp4`,
     color: '#118ab2',
   },
   {
@@ -94,7 +94,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A brilliant crystal shimmering in deep space with sparkling happiness.',
     position: [30, 22, -75],
     rotation: [0.6, -0.4, 0.1],
-    videoUrl: '/videos/VID20260211084314.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID20260211084314.mp4`,
     color: '#9c89ff',
   },
   {
@@ -105,7 +105,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'An ancient stellar relic glowing brightly in high solar orbit.',
     position: [-20, 30, 40],
     rotation: [-0.2, 0.6, 0.4],
-    videoUrl: '/videos/VID20260128081558.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID20260128081558.mp4`,
     color: '#ff70a6',
   },
   {
@@ -116,7 +116,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A celebratory capsule floating through a bright star cluster.',
     position: [78, 12, 15],
     rotation: [0.4, 0.1, -0.3],
-    videoUrl: '/videos/3100f53083475f7b3ab9b74fd0bd5502.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/3100f53083475f7b3ab9b74fd0bd5502.mp4`,
     color: '#ff9f1c',
   },
   {
@@ -127,7 +127,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'A deep space probe broadcasting heartwarming birthday wishes.',
     position: [-65, -20, 35],
     rotation: [-0.5, -0.3, 0.6],
-    videoUrl: '/videos/VID20260220235836.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/VID20260220235836.mp4`,
     color: '#e71d36',
   },
   {
@@ -138,7 +138,7 @@ export const TREASURES: TreasureConfig[] = [
     description: 'The ultimate golden relic shining brightly near Prapti\'s World.',
     position: [15, -25, -45],
     rotation: [0.2, 0.5, -0.1],
-    videoUrl: '/videos/0b88e5e8f978b023faea9320f1ca12f7.mp4',
+    videoUrl: `${import.meta.env.BASE_URL}videos/0b88e5e8f978b023faea9320f1ca12f7.mp4`,
     color: '#ff4d6d',
   },
 ];
