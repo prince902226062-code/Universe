@@ -351,7 +351,7 @@ export const PRAPTI_SPECIAL_MEMORIES: MemoryEntry[] = generateMemoriesFromFileLi
 
 export function generateMemoriesFromFileList(
   filenames: string[],
-  basePath = '/memories/'
+  basePath = `${import.meta.env.BASE_URL}memories/`
 ): MemoryEntry[] {
   return filenames.map((filename, index) => {
     // Distribute photos evenly across sphere using Fibonacci sphere algorithm
